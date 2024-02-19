@@ -34,7 +34,7 @@ ShipChain 是一个基于 Web3 技术的去中心化应用（DApp），旨在为
 
 1. 克隆该仓库:
    ```bash
-   https://github.com/cxp-13/ShipChain_SmartContract.git
+   git clone https://github.com/cxp-13/ShipChain_SmartContract.git
    ```
 
 2. 安装依赖:
