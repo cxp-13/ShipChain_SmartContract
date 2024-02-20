@@ -50,7 +50,7 @@ describe('MealManager', function () {
             orderTime,
             shippingAddress,
             orderAmountToNFT,
-            ["pro1", "pro2"],
+            productIdList,
             note
         );
         // 检查NFC是否铸造成功
@@ -87,4 +87,72 @@ describe('MealManager', function () {
         expect(storedOrder.note).to.equal(note);
 
     });
+
+    it("delete a order", async function () {
+        // 执行一些操作来存储一个新订单
+        const userId = "user123";
+        const orderId = "order123";
+        const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
+        const shippingAddress = "123 Main St";
+        const orderAmountToNFT = 200n;
+        const productIdList = ["pro1", "pro2"];
+        const note = "This is a test order.";
+        // 调用storeOrder函数
+        await mealManager.storeOrder(
+            userId,
+            orderId,
+            orderTime,
+            shippingAddress,
+            orderAmountToNFT,
+            productIdList,
+            note
+        );
+        const order = await mealManager.userOrders(userId, orderId);
+        expect(order).to.not.be.empty;
+        // 删除该order
+        await mealManager.deleteOrder(userId, orderId);
+        const deletedOrder = await mealManager.userOrders(userId, orderId);
+        console.log("deletedOrder", deletedOrder);
+        // 其他属性类似
+        expect(deletedOrder.note).to.equal("");
+    })
+
+    it("update a order", async function () {
+        // 执行一些操作来存储一个新订单
+        const userId = "user123";
+        const orderId = "order123";
+        const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
+        const shippingAddress = "123 Main St";
+        const orderAmountToNFT = 200n;
+        const productIdList = ["pro1", "pro2"];
+        const note = "This is a test order.";
+        // 调用storeOrder函数
+        await mealManager.storeOrder(
+            userId,
+            orderId,
+            orderTime,
+            shippingAddress,
+            orderAmountToNFT,
+            productIdList,
+            note
+        );
+        const order = await mealManager.userOrders(userId, orderId);
+        expect(order).to.not.be.empty;
+        // 更新该order的productIdList
+        const newProductIdList = ["pro1", "pro2", "pro3"];
+        await mealManager.updateOrder(
+            userId,
+            orderId,
+            orderTime,
+            shippingAddress,
+            orderAmountToNFT,
+            newProductIdList,
+            note
+        );
+        const updateOrders = await mealManager.getBatchOrdersForUser(userId, [orderId]);
+        console.log("updateOrders", updateOrders);
+        let updateOrder = updateOrders[0];
+        // 其他属性类似
+        expect(updateOrder.productIdList).to.deep.equal(newProductIdList);
+    })
 });
