@@ -24,7 +24,8 @@ contract MealManager is IMealManager, ISuperToken {
         string memory userId,
         string memory orderId,
         uint256 orderTime,
-        string memory shippingAddress,
+        string memory startPoint, // 商家地址
+        string memory endPoint, // 用户地址
         uint256 orderAmount,
         string[] memory productIdList,
         string memory note,
@@ -49,22 +50,18 @@ contract MealManager is IMealManager, ISuperToken {
         Order storage newOrder = userOrders[userId][orderId];
         newOrder.owner = msg.sender;
         newOrder.orderTime = orderTime;
-        newOrder.shippingAddress = shippingAddress;
+        newOrder.startPoint = startPoint;
+        newOrder.endPoint = endPoint;
         newOrder.orderAmount = orderAmount;
         newOrder.userId = userId;
+        newOrder.orderId = orderId;
         newOrder.note = note;
         newOrder.productIdList = productIdList;
 
         emit OrderStored(
             msg.sender,
             orderId,
-            orderTime,
-            shippingAddress,
-            orderAmount,
-            productIdList,
-            userId,
-            note,
-            isSuper
+            userId
         );
 
         // Mint tokens based on order price
@@ -112,14 +109,16 @@ contract MealManager is IMealManager, ISuperToken {
         string memory userId,
         string memory orderId,
         uint256 orderTime,
-        string memory shippingAddress,
+        string memory startPoint, // 商家地址
+        string memory endPoint, // 用户地址
         uint256 orderAmount,
         string[] memory productIdList,
         string memory note
     ) external {
         Order storage orderToUpdate = userOrders[userId][orderId];
         orderToUpdate.orderTime = orderTime;
-        orderToUpdate.shippingAddress = shippingAddress;
+        orderToUpdate.startPoint = startPoint;
+        orderToUpdate.endPoint = endPoint;
         orderToUpdate.orderAmount = orderAmount;
         orderToUpdate.productIdList = productIdList;
         orderToUpdate.note = note;

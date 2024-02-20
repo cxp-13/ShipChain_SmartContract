@@ -5,10 +5,12 @@ interface IMealManager {
     struct Order {
         address owner; // 购买人的钱包地址
         uint256 orderTime; // 订单创建的时间戳
-        string shippingAddress; // 订单配送地址信息
+        string startPoint; // 商家地址
+        string endPoint; // 用户地址
         uint256 orderAmount; // 订单的总金额
         string[] productIdList; // 存储在 MongoDB 中商品的 _id
         string userId; // 存储在 MongoDB 中用户的 _id
+        string orderId;//订单ID
         string note; // 用户订单的额外备注或要求
     }
 
@@ -16,13 +18,7 @@ interface IMealManager {
     event OrderStored(
         address indexed owner,
         string orderId,
-        uint256 orderTime,
-        string shippingAddress,
-        uint256 orderAmount,
-        string[] productIdList,
-        string userId,
-        string note,
-        bool isSuper
+        string userId
     );
 
     // Event emitted when tokens are minted
@@ -47,7 +43,8 @@ interface IMealManager {
         string memory userId,
         string memory orderId,
         uint256 orderTime,
-        string memory shippingAddress,
+        string memory startPoint, // 商家地址
+        string memory endPoint, // 用户地址
         uint256 orderAmount,
         string[] memory productIdList,
         string memory note,
@@ -62,7 +59,8 @@ interface IMealManager {
         string memory userId,
         string memory orderId,
         uint256 orderTime,
-        string memory shippingAddress,
+        string memory startPoint, // 商家地址
+        string memory endPoint, // 用户地址
         uint256 orderAmount,
         string[] memory productIdList,
         string memory note

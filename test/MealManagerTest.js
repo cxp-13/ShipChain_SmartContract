@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { Contract } = require("ethers");
-const isTimeZone  = require("../utils/time")
+const isTimeZone = require("../utils/time")
 
 describe('MealManager', function () {
     let mealManager;
@@ -36,7 +36,10 @@ describe('MealManager', function () {
         const userId = "user123";
         const orderId = "order123";
         const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
-        const shippingAddress = "123 Main St";
+
+        const startPoint = "猪脚饭店";
+        const endPoint = "新围仔";
+
         const orderAmountToToken = 5n;
         const productIdList = ["pro1", "pro2"];
         const note = "This is a test order.";
@@ -46,7 +49,8 @@ describe('MealManager', function () {
             userId,
             orderId,
             orderTime,
-            shippingAddress,
+            startPoint,
+            endPoint,
             orderAmountToToken,
             ["pro1", "pro2"],
             note,
@@ -65,7 +69,8 @@ describe('MealManager', function () {
         console.log("myOrders", myOrders);
         expect(storedOrder.userId).to.equal(userId);
         expect(storedOrder.orderTime).to.equal(orderTime);
-        expect(storedOrder.shippingAddress).to.equal(shippingAddress);
+        expect(storedOrder.startPoint).to.equal(startPoint);
+        expect(storedOrder.endPoint).to.equal(endPoint);
         expect(storedOrder.productIdList).to.deep.equal(productIdList);
         expect(storedOrder.note).to.equal(note);
     });
@@ -76,7 +81,8 @@ describe('MealManager', function () {
         const userId = "user123";
         const orderId = "order123";
         const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
-        const shippingAddress = "123 Main St";
+        const startPoint = "猪脚饭店";
+        const endPoint = "新围仔";
         const orderAmountToNFT = 200n;
         const productIdList = ["pro1", "pro2"];
         const note = "This is a test order.";
@@ -86,7 +92,8 @@ describe('MealManager', function () {
             userId,
             orderId,
             orderTime,
-            shippingAddress,
+            startPoint,
+            endPoint,
             orderAmountToNFT,
             productIdList,
             note,
@@ -105,7 +112,8 @@ describe('MealManager', function () {
         console.log("arr", myOrders);
         expect(storedOrder.userId).to.equal(userId);
         expect(storedOrder.orderTime).to.equal(orderTime);
-        expect(storedOrder.shippingAddress).to.equal(shippingAddress);
+        expect(storedOrder.startPoint).to.equal(startPoint);
+        expect(storedOrder.endPoint).to.equal(endPoint);
         expect(storedOrder.productIdList).to.deep.equal(productIdList);
         expect(storedOrder.note).to.equal(note);
     });
@@ -115,7 +123,8 @@ describe('MealManager', function () {
         const userId = "user123";
         const orderId = "order123";
         const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
-        const shippingAddress = "123 Main St";
+        const startPoint = "猪脚饭店";
+        const endPoint = "新围仔";
         const orderAmountToNFT = 200n;
         const productIdList = ["pro1", "pro2"];
         const note = "This is a test order.";
@@ -124,7 +133,8 @@ describe('MealManager', function () {
             userId,
             orderId,
             orderTime,
-            shippingAddress,
+            startPoint,
+            endPoint,
             orderAmountToNFT,
             productIdList,
             note,
@@ -145,7 +155,8 @@ describe('MealManager', function () {
         const userId = "user123";
         const orderId = "order123";
         const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
-        const shippingAddress = "123 Main St";
+        const startPoint = "猪脚饭店";
+        const endPoint = "新围仔";
         const orderAmountToNFT = 200n;
         const productIdList = ["pro1", "pro2"];
         const note = "This is a test order.";
@@ -154,7 +165,8 @@ describe('MealManager', function () {
             userId,
             orderId,
             orderTime,
-            shippingAddress,
+            startPoint,
+            endPoint,
             orderAmountToNFT,
             productIdList,
             note,
@@ -168,7 +180,8 @@ describe('MealManager', function () {
             userId,
             orderId,
             orderTime,
-            shippingAddress,
+            startPoint,
+            endPoint,
             orderAmountToNFT,
             newProductIdList,
             note
@@ -185,7 +198,8 @@ describe('MealManager', function () {
         const userId = "user123";
         const orderId = "order123";
         const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
-        const shippingAddress = "123 Main St";
+        const startPoint = "猪脚饭店";
+        const endPoint = "新围仔";
         const orderAmount = 200n;
         const productIdList = ["pro1", "pro2"];
         const note = "This is a test order.";
@@ -197,7 +211,8 @@ describe('MealManager', function () {
             userId,
             orderId,
             orderTime,
-            shippingAddress,
+            startPoint,
+            endPoint,
             orderAmount,
             productIdList,
             note,
@@ -209,7 +224,7 @@ describe('MealManager', function () {
         let balanceOfETH = Number(ethers.formatEther(balanceOf));
         expect(balanceOfETH).to.equal(Number(orderAmount));
         console.log("balanceOfETH", balanceOfETH);
-        
+
     })
 });
 
