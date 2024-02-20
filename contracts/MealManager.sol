@@ -4,8 +4,9 @@ pragma solidity ^0.8.0;
 import "./MealToken.sol";
 import "./MealNFT.sol";
 import "./IMealManager.sol";
+import "./ISuperToken.sol";
 
-contract MealManager is IMealManager {
+contract MealManager is IMealManager, ISuperToken {
     // Storage for order messages
     mapping(string => mapping(string => Order)) public userOrders;
     // Address of MealToken contract
@@ -26,7 +27,8 @@ contract MealManager is IMealManager {
         string memory shippingAddress,
         uint256 orderAmount,
         string[] memory productIdList,
-        string memory note
+        string memory note,
+        bool isSuper
     ) external {
         // Check if orderTime is earlier than the current block's timestamp
         if (orderTime > block.timestamp) {
@@ -61,11 +63,16 @@ contract MealManager is IMealManager {
             orderAmount,
             productIdList,
             userId,
-            note
+            note,
+            isSuper
         );
 
         // Mint tokens based on order price
-        mintTokens(orderAmount, orderId, msg.sender);
+        if (!isSuper) {
+            mintTokens(orderAmount, orderId, msg.sender);
+        } else {
+            mintSuperTokens(orderAmount, orderId, msg.sender);
+        }
     }
 
     // Function to mint tokens based on order price
@@ -73,7 +80,7 @@ contract MealManager is IMealManager {
         uint256 price,
         string memory orderId,
         address recipient
-    ) internal {
+    ) public {
         if (price > 20) {
             MealNFT(mealNFT).mintTo(recipient, orderId);
             emit TokensMinted(recipient, 1, orderId, true);
@@ -82,6 +89,17 @@ contract MealManager is IMealManager {
             MealToken(mealToken).mintTo(recipient, tokenAmount);
             emit TokensMinted(recipient, tokenAmount, orderId, false);
         }
+    }
+
+    // Function to mint tokens based on order price
+    function mintSuperTokens(
+        uint256 price,
+        string memory orderId,
+        address recipient
+    ) public {
+        uint tokenAmount = price * 1e18;
+        MealToken(mealToken).mintTo(recipient, tokenAmount);
+        emit TokensMinted(recipient, tokenAmount, orderId, false);
     }
 
     // Function to delete an order by its ID

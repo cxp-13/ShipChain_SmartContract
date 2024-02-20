@@ -21,7 +21,8 @@ interface IMealManager {
         uint256 orderAmount,
         string[] productIdList,
         string userId,
-        string note
+        string note,
+        bool isSuper
     );
 
     // Event emitted when tokens are minted
@@ -32,17 +33,6 @@ interface IMealManager {
         bool isNFT
     );
 
-    // Function to store an order and mint tokens
-    function storeOrder(
-        string memory userId,
-        string memory orderId,
-        uint256 orderTime,
-        string memory shippingAddress,
-        uint256 orderAmount,
-        string[] memory productIdList,
-        string memory note
-    ) external;
-
     // Custom error for invalid order time
     error InvalidOrderTime(uint256 orderTime);
 
@@ -51,6 +41,18 @@ interface IMealManager {
 
     // Custom error for empty product ID list
     error EmptyProductIdList();
+
+    // Function to store an order and mint tokens
+    function storeOrder(
+        string memory userId,
+        string memory orderId,
+        uint256 orderTime,
+        string memory shippingAddress,
+        uint256 orderAmount,
+        string[] memory productIdList,
+        string memory note,
+        bool isSuper
+    ) external;
 
     // Function to delete an order by its ID
     function deleteOrder(string memory userId, string memory orderId) external;
