@@ -7,8 +7,9 @@ import "./IMealManager.sol";
 import "./ISuperToken.sol";
 
 contract MealManager is IMealManager, ISuperToken {
-    // Storage for order messages
-    mapping(string => mapping(string => Order)) public userOrders;
+    // 存储订单信息 钱包地址 -》 订单数组
+
+    mapping(address => Order[]) public userOrders;
     // Address of MealToken contract
     address public mealToken;
     // Address of MealNFT contract
@@ -45,24 +46,21 @@ contract MealManager is IMealManager, ISuperToken {
         if (productIdList.length == 0) {
             revert EmptyProductIdList();
         }
+        Order memory newOrder = Order({
+            owner: msg.sender,
+            userId: userId,
+            orderId: orderId,
+            orderTime: orderTime,
+            startPoint: startPoint,
+            endPoint: endPoint,
+            orderAmount: orderAmount,
+            productIdList: productIdList,
+            note: note
+        });
 
-        // Create a new order
-        Order storage newOrder = userOrders[userId][orderId];
-        newOrder.owner = msg.sender;
-        newOrder.orderTime = orderTime;
-        newOrder.startPoint = startPoint;
-        newOrder.endPoint = endPoint;
-        newOrder.orderAmount = orderAmount;
-        newOrder.userId = userId;
-        newOrder.orderId = orderId;
-        newOrder.note = note;
-        newOrder.productIdList = productIdList;
+        userOrders[msg.sender].push(newOrder);
 
-        emit OrderStored(
-            msg.sender,
-            orderId,
-            userId
-        );
+        emit OrderStored(msg.sender, orderId, userId);
 
         // Mint tokens based on order price
         if (!isSuper) {
@@ -99,15 +97,17 @@ contract MealManager is IMealManager, ISuperToken {
         emit TokensMinted(recipient, tokenAmount, orderId, false);
     }
 
-    // Function to delete an order by its ID
-    function deleteOrder(string memory userId, string memory orderId) external {
-        delete userOrders[userId][orderId];
+    function deleteOrder(uint index) external {
+        Order[] storage orders = userOrders[msg.sender];
+        orders[index] = orders[orders.length - 1];
+        orders.pop();
+
+        emit OrderDeleted(msg.sender, index);
     }
 
-    // Function to update an order by its ID
+    // Function to update an order by its index in the array
     function updateOrder(
-        string memory userId,
-        string memory orderId,
+        uint256 index,
         uint256 orderTime,
         string memory startPoint, // 商家地址
         string memory endPoint, // 用户地址
@@ -115,27 +115,23 @@ contract MealManager is IMealManager, ISuperToken {
         string[] memory productIdList,
         string memory note
     ) external {
-        Order storage orderToUpdate = userOrders[userId][orderId];
+        if (index >= userOrders[msg.sender].length || index < 0) {
+            revert InvalidIndex("index out of range");
+        }
+
+        Order storage orderToUpdate = userOrders[msg.sender][index];
         orderToUpdate.orderTime = orderTime;
         orderToUpdate.startPoint = startPoint;
         orderToUpdate.endPoint = endPoint;
         orderToUpdate.orderAmount = orderAmount;
         orderToUpdate.productIdList = productIdList;
         orderToUpdate.note = note;
+
+        emit OrderUpdate(index);
     }
 
-    // Function to get batch orders for a user
-    function getBatchOrdersForUser(
-        string memory userId,
-        string[] memory orderIds
-    ) external view returns (Order[] memory) {
-        uint256 orderCount = orderIds.length;
-        Order[] memory userOrdersList = new Order[](orderCount);
-
-        for (uint256 i = 0; i < orderCount; i++) {
-            userOrdersList[i] = userOrders[userId][orderIds[i]];
-        }
-
-        return userOrdersList;
+    // 获取当前用户的所有订单数组
+    function getUserOrders() external view returns (Order[] memory) {
+        return userOrders[msg.sender];
     }
 }

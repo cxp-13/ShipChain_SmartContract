@@ -29,6 +29,10 @@ interface IMealManager {
         bool isNFT
     );
 
+    event OrderDeleted(address indexed user, uint index);
+    event OrderUpdate(uint256 indexed index);
+
+
     // Custom error for invalid order time
     error InvalidOrderTime(uint256 orderTime);
 
@@ -37,6 +41,7 @@ interface IMealManager {
 
     // Custom error for empty product ID list
     error EmptyProductIdList();
+    error InvalidIndex(string message);
 
     // Function to store an order and mint tokens
     function storeOrder(
@@ -52,12 +57,11 @@ interface IMealManager {
     ) external;
 
     // Function to delete an order by its ID
-    function deleteOrder(string memory userId, string memory orderId) external;
+    function deleteOrder(uint256 index) external;
 
     // Function to update an order by its ID
     function updateOrder(
-        string memory userId,
-        string memory orderId,
+        uint256 index,
         uint256 orderTime,
         string memory startPoint, // 商家地址
         string memory endPoint, // 用户地址
@@ -67,8 +71,5 @@ interface IMealManager {
     ) external;
 
     // Function to get all orders for a user
-    function getBatchOrdersForUser(
-        string memory userId,
-        string[] memory orderIds
-    ) external view returns (Order[] memory);
+    function getUserOrders() external view returns (Order[] memory);
 }

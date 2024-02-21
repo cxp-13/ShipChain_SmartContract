@@ -36,10 +36,8 @@ describe('MealManager', function () {
         const userId = "user123";
         const orderId = "order123";
         const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
-
         const startPoint = "猪脚饭店";
         const endPoint = "新围仔";
-
         const orderAmountToToken = 5n;
         const productIdList = ["pro1", "pro2"];
         const note = "This is a test order.";
@@ -52,7 +50,7 @@ describe('MealManager', function () {
             startPoint,
             endPoint,
             orderAmountToToken,
-            ["pro1", "pro2"],
+            productIdList,
             note,
             false
         );
@@ -64,9 +62,9 @@ describe('MealManager', function () {
         // 断言结果
         // 该方式返回的productIdList为undefined
         // const storedOrder = await mealManager.userOrders(userId, orderId);
-        let myOrders = await mealManager.getBatchOrdersForUser(userId, [orderId]);
+        let myOrders = await mealManager.getUserOrders();
         let storedOrder = myOrders[0];
-        console.log("myOrders", myOrders);
+        console.log("mint token myOrders", myOrders);
         expect(storedOrder.userId).to.equal(userId);
         expect(storedOrder.orderTime).to.equal(orderTime);
         expect(storedOrder.startPoint).to.equal(startPoint);
@@ -107,9 +105,9 @@ describe('MealManager', function () {
         // 断言结果
         // 该方式返回的productIdList为undefined
         // const storedOrder = await mealManager.userOrders(userId, orderId);
-        let myOrders = await mealManager.getBatchOrdersForUser(userId, [orderId]);
+        let myOrders = await mealManager.getUserOrders();
         let storedOrder = myOrders[0];
-        console.log("arr", myOrders);
+        console.log("mint NFT myOrders", myOrders);
         expect(storedOrder.userId).to.equal(userId);
         expect(storedOrder.orderTime).to.equal(orderTime);
         expect(storedOrder.startPoint).to.equal(startPoint);
@@ -120,7 +118,7 @@ describe('MealManager', function () {
 
     it("delete a order", async function () {
         // 执行一些操作来存储一个新订单
-        const userId = "user123";
+        const userId = "user";
         const orderId = "order123";
         const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
         const startPoint = "猪脚饭店";
@@ -129,25 +127,30 @@ describe('MealManager', function () {
         const productIdList = ["pro1", "pro2"];
         const note = "This is a test order.";
         // 调用storeOrder函数
-        await mealManager.storeOrder(
-            userId,
-            orderId,
-            orderTime,
-            startPoint,
-            endPoint,
-            orderAmountToNFT,
-            productIdList,
-            note,
-            false
-        );
-        const order = await mealManager.userOrders(userId, orderId);
-        expect(order).to.not.be.empty;
-        // 删除该order
-        await mealManager.deleteOrder(userId, orderId);
-        const deletedOrder = await mealManager.userOrders(userId, orderId);
-        console.log("deletedOrder", deletedOrder);
+        for (let index = 0; index < 5; index++) {
+            await mealManager.storeOrder(
+                userId + index,
+                orderId,
+                orderTime,
+                startPoint,
+                endPoint,
+                orderAmountToNFT,
+                productIdList,
+                note,
+                false
+            );
+        }
+
+        // 删除该order, 将最后一个元素与被删除元素互换。
+        await mealManager.deleteOrder(0);
+        const myOrders = await mealManager.getUserOrders();
+        const firstOrder = myOrders[0];
+        console.log("deletedOrder myOrders", myOrders);
         // 其他属性类似
-        expect(deletedOrder.note).to.equal("");
+        expect(myOrders.length).to.equal(4);
+        expect(firstOrder.userId).to.equal("user4");
+
+
     })
 
     it("update a order", async function () {
@@ -160,6 +163,7 @@ describe('MealManager', function () {
         const orderAmountToNFT = 200n;
         const productIdList = ["pro1", "pro2"];
         const note = "This is a test order.";
+        const index = 0;
         // 调用storeOrder函数
         await mealManager.storeOrder(
             userId,
@@ -172,13 +176,10 @@ describe('MealManager', function () {
             note,
             false
         );
-        const order = await mealManager.userOrders(userId, orderId);
-        expect(order).to.not.be.empty;
         // 更新该order的productIdList
         const newProductIdList = ["pro1", "pro2", "pro3"];
         await mealManager.updateOrder(
-            userId,
-            orderId,
+            index,
             orderTime,
             startPoint,
             endPoint,
@@ -186,9 +187,9 @@ describe('MealManager', function () {
             newProductIdList,
             note
         );
-        const updateOrders = await mealManager.getBatchOrdersForUser(userId, [orderId]);
-        console.log("updateOrders", updateOrders);
-        let updateOrder = updateOrders[0];
+        const myOrders = await mealManager.getUserOrders();
+        console.log("updateOrders myOrders", myOrders);
+        let updateOrder = myOrders[0];
         // 其他属性类似
         expect(updateOrder.productIdList).to.deep.equal(newProductIdList);
     })
@@ -224,7 +225,6 @@ describe('MealManager', function () {
         let balanceOfETH = Number(ethers.formatEther(balanceOf));
         expect(balanceOfETH).to.equal(Number(orderAmount));
         console.log("balanceOfETH", balanceOfETH);
-
     })
 });
 
