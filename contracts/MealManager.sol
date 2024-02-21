@@ -98,6 +98,10 @@ contract MealManager is IMealManager, ISuperToken {
     }
 
     function deleteOrder(uint index) external {
+        if (index >= userOrders[msg.sender].length || index < 0) {
+            revert InvalidIndex("index out of range");
+        }
+
         Order[] storage orders = userOrders[msg.sender];
         orders[index] = orders[orders.length - 1];
         orders.pop();
