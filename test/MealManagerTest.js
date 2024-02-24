@@ -34,23 +34,23 @@ describe('MealManager', function () {
     it('test store order and mint token', async function () {
         // 执行一些操作来存储一个新订单
         const userId = "user123";
-        const orderId = "order123";
-        const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
+        const id = "order123";
+        const createAt = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
         const startPoint = "猪脚饭店";
         const endPoint = "新围仔";
         const orderAmountToToken = 5n;
-        const productIdList = ["pro1", "pro2"];
+        const mealIds = ["pro1", "pro2"];
         const note = "This is a test order.";
 
         // 调用storeOrder函数
         await mealManager.storeOrder(
             userId,
-            orderId,
-            orderTime,
+            id,
+            createAt,
             startPoint,
             endPoint,
             orderAmountToToken,
-            productIdList,
+            mealIds,
             note,
             false
         );
@@ -60,16 +60,16 @@ describe('MealManager', function () {
         expect(balanceOfETH).to.equal(Number(orderAmountToToken) / 100);
         console.log("balanceOfETH", balanceOfETH);
         // 断言结果
-        // 该方式返回的productIdList为undefined
-        // const storedOrder = await mealManager.userOrders(userId, orderId);
+        // 该方式返回的mealIds为undefined
+        // const storedOrder = await mealManager.userOrders(userId, id);
         let myOrders = await mealManager.getUserOrders();
         let storedOrder = myOrders[0];
         console.log("mint token myOrders", myOrders);
         expect(storedOrder.userId).to.equal(userId);
-        expect(storedOrder.orderTime).to.equal(orderTime);
+        expect(storedOrder.createAt).to.equal(createAt);
         expect(storedOrder.startPoint).to.equal(startPoint);
         expect(storedOrder.endPoint).to.equal(endPoint);
-        expect(storedOrder.productIdList).to.deep.equal(productIdList);
+        expect(storedOrder.mealIds).to.deep.equal(mealIds);
         expect(storedOrder.note).to.equal(note);
     });
 
@@ -77,65 +77,65 @@ describe('MealManager', function () {
 
         // 执行一些操作来存储一个新订单
         const userId = "user123";
-        const orderId = "order123";
-        const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
+        const id = "order123";
+        const createAt = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
         const startPoint = "猪脚饭店";
         const endPoint = "新围仔";
         const orderAmountToNFT = 200n;
-        const productIdList = ["pro1", "pro2"];
+        const mealIds = ["pro1", "pro2"];
         const note = "This is a test order.";
 
         // 调用storeOrder函数
         await mealManager.storeOrder(
             userId,
-            orderId,
-            orderTime,
+            id,
+            createAt,
             startPoint,
             endPoint,
             orderAmountToNFT,
-            productIdList,
+            mealIds,
             note,
             false
         );
 
         // 检查NFC是否铸造成功
         let nftInfo = await mealNFT.tokenURI(0);
-        expect(nftInfo).to.equal(orderId);
+        expect(nftInfo).to.equal(id);
         console.log("nftInfo", nftInfo);
         // 断言结果
-        // 该方式返回的productIdList为undefined
-        // const storedOrder = await mealManager.userOrders(userId, orderId);
+        // 该方式返回的mealIds为undefined
+        // const storedOrder = await mealManager.userOrders(userId, id);
         let myOrders = await mealManager.getUserOrders();
         let storedOrder = myOrders[0];
         console.log("mint NFT myOrders", myOrders);
         expect(storedOrder.userId).to.equal(userId);
-        expect(storedOrder.orderTime).to.equal(orderTime);
+        expect(storedOrder.createAt).to.equal(createAt);
         expect(storedOrder.startPoint).to.equal(startPoint);
         expect(storedOrder.endPoint).to.equal(endPoint);
-        expect(storedOrder.productIdList).to.deep.equal(productIdList);
+        expect(storedOrder.mealIds).to.deep.equal(mealIds);
         expect(storedOrder.note).to.equal(note);
     });
 
     it("delete a order", async function () {
         // 执行一些操作来存储一个新订单
         const userId = "user";
-        const orderId = "order123";
-        const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
+        const id = "order123";
+        const createAt = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
         const startPoint = "猪脚饭店";
         const endPoint = "新围仔";
         const orderAmountToNFT = 200n;
-        const productIdList = ["pro1", "pro2"];
+        const mealIds = ["pro1", "pro2"];
         const note = "This is a test order.";
         // 调用storeOrder函数
         for (let index = 0; index < 5; index++) {
             await mealManager.storeOrder(
                 userId + index,
-                orderId,
-                orderTime,
+                id,
+                createAt,
                 startPoint,
                 endPoint,
                 orderAmountToNFT,
-                productIdList,
+                mealIds,
                 note,
                 false
             );
@@ -156,53 +156,53 @@ describe('MealManager', function () {
     it("update a order", async function () {
         // 执行一些操作来存储一个新订单
         const userId = "user123";
-        const orderId = "order123";
-        const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
+        const id = "order123";
+        const createAt = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
         const startPoint = "猪脚饭店";
         const endPoint = "新围仔";
         const orderAmountToNFT = 200n;
-        const productIdList = ["pro1", "pro2"];
+        const mealIds = ["pro1", "pro2"];
         const note = "This is a test order.";
         const index = 0;
         // 调用storeOrder函数
         await mealManager.storeOrder(
             userId,
-            orderId,
-            orderTime,
+            id,
+            createAt,
             startPoint,
             endPoint,
             orderAmountToNFT,
-            productIdList,
+            mealIds,
             note,
             false
         );
-        // 更新该order的productIdList
-        const newProductIdList = ["pro1", "pro2", "pro3"];
+        // 更新该order的mealIds
+        const newmealIds = ["pro1", "pro2", "pro3"];
         await mealManager.updateOrder(
             index,
-            orderTime,
+            createAt,
             startPoint,
             endPoint,
             orderAmountToNFT,
-            newProductIdList,
+            newmealIds,
             note
         );
         const myOrders = await mealManager.getUserOrders();
         console.log("updateOrders myOrders", myOrders);
         let updateOrder = myOrders[0];
         // 其他属性类似
-        expect(updateOrder.productIdList).to.deep.equal(newProductIdList);
+        expect(updateOrder.mealIds).to.deep.equal(newmealIds);
     })
 
     it("test super mode", async function () {
         // 执行一些操作来存储一个新订单
         const userId = "user123";
-        const orderId = "order123";
-        const orderTime = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
+        const id = "order123";
+        const createAt = Math.floor(Date.now() / 1000) - 8888; // 当前时间戳
         const startPoint = "猪脚饭店";
         const endPoint = "新围仔";
         const orderAmount = 200n;
-        const productIdList = ["pro1", "pro2"];
+        const mealIds = ["pro1", "pro2"];
         const note = "This is a test order.";
         const selectTimeZone = 8;
         const isSuper = isTimeZone(selectTimeZone);
@@ -210,12 +210,12 @@ describe('MealManager', function () {
         // 调用storeOrder函数
         await mealManager.storeOrder(
             userId,
-            orderId,
-            orderTime,
+            id,
+            createAt,
             startPoint,
             endPoint,
             orderAmount,
-            productIdList,
+            mealIds,
             note,
             isSuper
         );
