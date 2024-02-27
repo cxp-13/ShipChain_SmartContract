@@ -1,22 +1,16 @@
 import { ethers } from "hardhat";
+require("dotenv").config(); // 加载环境变量
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  const tokenContract = "0x3e90F98cFc251F8e93fCc01EFD94742B7462805B";
+  const nftContract = "0xa4Ec768ca47160Df1c4a645639A6b09cCF296064";
 
-  const lockedAmount = ethers.parseEther("0.001");
+  console.log("Deploying MealManager contract...");
+  const MealManager = await ethers.getContractFactory("MealManager");
+  const mealManager = await MealManager.deploy(tokenContract, nftContract);
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
-
-  await lock.waitForDeployment();
-
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
+  await mealManager.waitForDeployment();
+  console.log("MealManager contract deployed to:", mealManager.target);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

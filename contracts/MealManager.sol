@@ -1,22 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./MealToken.sol";
 import "./MealNFT.sol";
 import "./IMealManager.sol";
 import "./ISuperToken.sol";
+import "@thirdweb-dev/contracts/base/ERC20Base.sol";
 
-contract MealManager is IMealManager, ISuperToken {
+contract MealManager is IMealManager, ISuperToken, ERC20Base {
     // 存储订单信息 钱包地址 -》 订单数组
 
     mapping(address => Order[]) public userOrders;
-    // Address of MealToken contract
-    address public mealToken;
     // Address of MealNFT contract
     address public mealNFT;
 
-    constructor(address _mealToken, address _mealNFT) {
-        mealToken = _mealToken;
+    constructor(
+        address _mealNFT,
+        address _defaultAdmin,
+        string memory _name,
+        string memory _symbol
+    ) ERC20Base(_defaultAdmin, _name, _symbol) {
         mealNFT = _mealNFT;
     }
 
@@ -24,7 +26,6 @@ contract MealManager is IMealManager, ISuperToken {
     function storeOrder(
         string memory userId,
         string memory id,
-        uint256 createAt,
         string memory startPoint, // 商家地址
         string memory endPoint, // 用户地址
         uint256 amount,
@@ -32,11 +33,6 @@ contract MealManager is IMealManager, ISuperToken {
         string memory note,
         bool isSuper
     ) external {
-        // Check if createAt is earlier than the current block's timestamp
-        if (createAt > block.timestamp) {
-            revert InvalidOrderTime(createAt);
-        }
-
         // Check if amount is greater than 0
         if (amount <= 0) {
             revert InvalidOrderAmount(amount);
@@ -46,11 +42,12 @@ contract MealManager is IMealManager, ISuperToken {
         if (mealIds.length == 0) {
             revert EmptyMealIdList();
         }
+
         Order memory newOrder = Order({
             owner: msg.sender,
             userId: userId,
             id: id,
-            createAt: createAt,
+            createAt: block.timestamp,
             startPoint: startPoint,
             endPoint: endPoint,
             amount: amount,
@@ -81,7 +78,7 @@ contract MealManager is IMealManager, ISuperToken {
             emit TokensMinted(recipient, 1, id, true);
         } else {
             uint tokenAmount = price * 1e16;
-            MealToken(mealToken).mintTo(recipient, tokenAmount);
+            mintTo(recipient, tokenAmount);
             emit TokensMinted(recipient, tokenAmount, id, false);
         }
     }
@@ -93,7 +90,7 @@ contract MealManager is IMealManager, ISuperToken {
         address recipient
     ) public {
         uint tokenAmount = price * 1e18;
-        MealToken(mealToken).mintTo(recipient, tokenAmount);
+        mintTo(recipient, tokenAmount);
         emit TokensMinted(recipient, tokenAmount, id, false);
     }
 
@@ -112,11 +109,8 @@ contract MealManager is IMealManager, ISuperToken {
     // Function to update an order by its index in the array
     function updateOrder(
         uint256 index,
-        uint256 createAt,
         string memory startPoint, // 商家地址
         string memory endPoint, // 用户地址
-        uint256 amount,
-        string[] memory mealIds,
         string memory note
     ) external {
         if (index >= userOrders[msg.sender].length || index < 0) {
@@ -124,11 +118,8 @@ contract MealManager is IMealManager, ISuperToken {
         }
 
         Order storage orderToUpdate = userOrders[msg.sender][index];
-        orderToUpdate.createAt = createAt;
         orderToUpdate.startPoint = startPoint;
         orderToUpdate.endPoint = endPoint;
-        orderToUpdate.amount = amount;
-        orderToUpdate.mealIds = mealIds;
         orderToUpdate.note = note;
 
         emit OrderUpdate(index);
