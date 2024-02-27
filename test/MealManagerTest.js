@@ -6,6 +6,7 @@ const isTimeZone = require("../utils/time")
 describe('MealManager', function () {
     let mealManager;
     let mealNFT;
+    let mealToken;
     let owner;
 
     beforeEach(async function () {
@@ -14,10 +15,13 @@ describe('MealManager', function () {
         console.log("owner", owner);
         // 部署NFT合约
         mealNFT = await ethers.deployContract('MealNFT', [owner.address, "LTLL", "LTLL", owner.address, 200n], owner)
+        mealToken = await ethers.deployContract('MealToken', [owner.address, "LTLL", "LTLL"], owner)
+
         // 部署外卖管理合约
-        mealManager = await ethers.deployContract('MealManager', [mealNFT.target, owner.address, "LTLL", "LTLL"], owner)
+        mealManager = await ethers.deployContract('MealManager', [mealNFT.target, mealToken.target], owner)
         mealNFT.setOwner(mealManager.target);
-        
+        mealToken.setOwner(mealManager.target);
+
         console.log("mealNFT.owner()", await mealNFT.owner());
 
         mealManager.on("TokensMinted", (...result) => {
@@ -47,7 +51,7 @@ describe('MealManager', function () {
             false
         );
         // 检查Token是否铸造成功
-        let balanceOf = await mealManager.balanceOf(owner.address);
+        let balanceOf = await mealToken.balanceOf(owner.address);
         let balanceOfETH = Number(ethers.formatEther(balanceOf));
         expect(balanceOfETH).to.equal(Number(orderAmountToToken) / 100);
         console.log("balanceOfETH", balanceOfETH);
@@ -112,27 +116,19 @@ describe('MealManager', function () {
         const mealIds = ["pro1", "pro2"];
         const note = "This is a test order.";
         // 调用storeOrder函数
-        for (let index = 0; index < 5; index++) {
-            await mealManager.storeOrder(
-                userId + index,
-                id,
-                startPoint,
-                endPoint,
-                orderAmountToNFT,
-                mealIds,
-                note,
-                false
-            );
-        }
-
-        // 删除该order, 将最后一个元素与被删除元素互换。
+        await mealManager.storeOrder(
+            userId,
+            id,
+            startPoint,
+            endPoint,
+            orderAmountToNFT,
+            mealIds,
+            note,
+            false
+        );
         await mealManager.deleteOrder(0);
         const myOrders = await mealManager.getUserOrders();
-        const firstOrder = myOrders[0];
-        console.log("deletedOrder myOrders", myOrders);
-        // 其他属性类似
-        expect(myOrders.length).to.equal(4);
-        expect(firstOrder.userId).to.equal("user4");
+        expect(myOrders.length).to.equal(0);
     })
 
     it("update a order", async function () {
@@ -196,10 +192,51 @@ describe('MealManager', function () {
         );
 
         // 检查Token是否铸造成功
-        let balanceOf = await mealManager.balanceOf(owner.address);
+        let balanceOf = await mealToken.balanceOf(owner.address);
         let balanceOfETH = Number(ethers.formatEther(balanceOf));
         expect(balanceOfETH).to.equal(Number(orderAmount));
         console.log("balanceOfETH", balanceOfETH);
+    })
+
+    it("test invalidCreateAt", async function () {
+        // 执行一些操作来存储一个新订单
+        const userId = "user123";
+        const id = "order123";
+        const startPoint = "猪脚饭店";
+        const endPoint = "新围仔";
+        const orderAmount = 200n;
+        const mealIds = ["pro1", "pro2"];
+        const note = "This is a test order.";
+        const selectTimeZone = 8;
+        const isSuper = isTimeZone(selectTimeZone);
+        console.log("isSuper", isSuper);
+        // 调用storeOrder函数
+        await mealManager.storeOrder(
+            userId,
+            id,
+            startPoint,
+            endPoint,
+            orderAmount,
+            mealIds,
+            note,
+            isSuper
+        );
+
+        await expect(mealManager.storeOrder(
+            userId,
+            id + "321",
+            startPoint,
+            endPoint,
+            orderAmount,
+            mealIds,
+            note,
+            isSuper
+        )).to.be.revertedWithCustomError(
+            mealManager,
+            'InvalidCreateAt'
+        ).withArgs(
+            "Time interval between orders must be at least 4 hours"
+        );
     })
 });
 

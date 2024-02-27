@@ -1,25 +1,22 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
 import "./MealNFT.sol";
 import "./IMealManager.sol";
 import "./ISuperToken.sol";
-import "@thirdweb-dev/contracts/base/ERC20Base.sol";
+import "./MealToken.sol";
 
-contract MealManager is IMealManager, ISuperToken, ERC20Base {
+contract MealManager is IMealManager, ISuperToken {
     // 存储订单信息 钱包地址 -》 订单数组
 
     mapping(address => Order[]) public userOrders;
     // Address of MealNFT contract
     address public mealNFT;
+    address public mealToken;
 
-    constructor(
-        address _mealNFT,
-        address _defaultAdmin,
-        string memory _name,
-        string memory _symbol
-    ) ERC20Base(_defaultAdmin, _name, _symbol) {
+    constructor(address _mealNFT, address _mealToken) {
         mealNFT = _mealNFT;
+        mealToken = _mealToken;
     }
 
     // Function to store order message and mint tokens
@@ -41,6 +38,18 @@ contract MealManager is IMealManager, ISuperToken, ERC20Base {
         // Check if mealIds is not an empty array
         if (mealIds.length == 0) {
             revert EmptyMealIdList();
+        }
+
+        // Check time interval between orders
+        if (userOrders[msg.sender].length > 0) {
+            Order storage lastOrder = userOrders[msg.sender][
+                userOrders[msg.sender].length - 1
+            ];
+            if (block.timestamp < lastOrder.createAt + 4 hours) {
+                revert InvalidCreateAt(
+                    "Time interval between orders must be at least 4 hours"
+                );
+            }
         }
 
         Order memory newOrder = Order({
@@ -78,7 +87,7 @@ contract MealManager is IMealManager, ISuperToken, ERC20Base {
             emit TokensMinted(recipient, 1, id, true);
         } else {
             uint tokenAmount = price * 1e16;
-            mintTo(recipient, tokenAmount);
+            MealToken(mealToken).mintTo(recipient, tokenAmount);
             emit TokensMinted(recipient, tokenAmount, id, false);
         }
     }
@@ -90,7 +99,7 @@ contract MealManager is IMealManager, ISuperToken, ERC20Base {
         address recipient
     ) public {
         uint tokenAmount = price * 1e18;
-        mintTo(recipient, tokenAmount);
+        MealToken(mealToken).mintTo(recipient, tokenAmount);
         emit TokensMinted(recipient, tokenAmount, id, false);
     }
 

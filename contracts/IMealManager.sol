@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
 interface IMealManager {
     struct Order {
@@ -33,6 +33,8 @@ interface IMealManager {
     error InvalidOrderAmount(uint256 amount);
     error EmptyMealIdList();
     error InvalidIndex(string message);
+    error InvalidCreateAt(string message);
+
 
     function storeOrder(
         string memory userId,
