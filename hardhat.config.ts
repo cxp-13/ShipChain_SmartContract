@@ -9,6 +9,9 @@ import "@nomicfoundation/hardhat-toolbox";
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
   networks: {
+    hardhat: {
+      chainId:1337
+    },
     sepolia: {
       url: SEPOLIA_URL || "",
       accounts: [PRIVATE_KEY || ""]

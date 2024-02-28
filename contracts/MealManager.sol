@@ -9,6 +9,8 @@ import "./MealToken.sol";
 contract MealManager is IMealManager, ISuperToken {
     // 存储订单信息 钱包地址 -》 订单数组
 
+    address public admin;
+
     mapping(address => Order[]) public userOrders;
     // Address of MealNFT contract
     address public mealNFT;
@@ -17,6 +19,16 @@ contract MealManager is IMealManager, ISuperToken {
     constructor(address _mealNFT, address _mealToken) {
         mealNFT = _mealNFT;
         mealToken = _mealToken;
+        admin = msg.sender;
+    }
+
+    function setOwnerOfMealNFTAndMealToken(address newOwner) external {
+        if (msg.sender == admin) {
+            MealNFT(mealNFT).setOwner(newOwner);
+            MealToken(mealToken).setOwner(newOwner);
+        } else {
+            revert InvalidAdmin("Only admin can set");
+        }
     }
 
     // Function to store order message and mint tokens

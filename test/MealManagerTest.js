@@ -19,8 +19,8 @@ describe('MealManager', function () {
 
         // 部署外卖管理合约
         mealManager = await ethers.deployContract('MealManager', [mealNFT.target, mealToken.target], owner)
-        mealNFT.setOwner(mealManager.target);
-        mealToken.setOwner(mealManager.target);
+        await mealNFT.setOwner(mealManager.target);
+        await mealToken.setOwner(mealManager.target);
 
         console.log("mealNFT.owner()", await mealNFT.owner());
 
@@ -236,6 +236,32 @@ describe('MealManager', function () {
             'InvalidCreateAt'
         ).withArgs(
             "Time interval between orders must be at least 4 hours"
+        );
+    })
+
+    it("test setNewOwner", async function () {
+        let newMealManager = await ethers.deployContract('MealManager', [mealNFT.target, mealToken.target], owner);
+        console.log("newMealManager", newMealManager.target);
+
+        await mealManager.setOwnerOfMealNFTAndMealToken(newMealManager.target);
+        let mealNFTOwner = await mealNFT.owner();
+        let mealTokenOwner = await mealToken.owner();
+        console.log("mealNFTOwner", mealNFTOwner, "mealTokenOwner", mealTokenOwner);
+
+        expect(mealNFTOwner).to.equal(newMealManager.target);
+        expect(mealTokenOwner).to.equal(newMealManager.target);
+    })
+
+    it("test invalid admin", async function () {
+        // 非管理员尝试改变
+        let otherOne = await ethers.provider.getSigner(1);
+        let badMealManager = await ethers.deployContract('MealManager', [mealNFT.target, mealToken.target], otherOne);
+
+        await expect(mealManager.connect(otherOne).setOwnerOfMealNFTAndMealToken(badMealManager.target)).to.be.revertedWithCustomError(
+            mealManager,
+            'InvalidAdmin'
+        ).withArgs(
+            "Only admin can set"
         );
     })
 });

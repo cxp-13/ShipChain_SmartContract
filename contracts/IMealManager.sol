@@ -6,19 +6,15 @@ interface IMealManager {
         address owner; // 购买人的钱包地址
         string startPoint; // 商家地址
         string endPoint; // 用户地址
-        uint256 createAt;//创建时间
+        uint256 createAt; //创建时间
         uint256 amount; // 订单的总金额
         string[] mealIds; // 存储在 MongoDB 中商品的 _id
         string userId; // 存储在 MongoDB 中用户的 _id
-        string id;//订单ID
+        string id; //订单ID
         string note; // 用户订单的额外备注或要求
     }
 
-    event OrderStored(
-        address indexed owner,
-        string id,
-        string userId
-    );
+    event OrderStored(address indexed owner, string id, string userId);
 
     event TokensMinted(
         address indexed recipient,
@@ -34,7 +30,10 @@ interface IMealManager {
     error EmptyMealIdList();
     error InvalidIndex(string message);
     error InvalidCreateAt(string message);
+    error InvalidAdmin(string message);
 
+
+    function setOwnerOfMealNFTAndMealToken(address newOwner) external;
 
     function storeOrder(
         string memory userId,
