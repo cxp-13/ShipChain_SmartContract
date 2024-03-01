@@ -146,8 +146,9 @@ contract MealManager is IMealManager, ISuperToken {
         emit OrderUpdate(index);
     }
 
-    // 获取当前用户的所有订单数组
-    function getUserOrders() external view returns (Order[] memory) {
-        return userOrders[msg.sender];
+    function getUserOrders(
+        address userAddress
+    ) external view returns (Order[] memory) {
+        return userOrders[userAddress];
     }
 }

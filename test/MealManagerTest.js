@@ -8,10 +8,13 @@ describe('MealManager', function () {
     let mealNFT;
     let mealToken;
     let owner;
+    let otherOne;
 
     beforeEach(async function () {
         // 获取签名者
         owner = await ethers.provider.getSigner(0);
+        otherOne = await ethers.provider.getSigner(1);
+
         console.log("owner", owner);
         // 部署NFT合约
         mealNFT = await ethers.deployContract('MealNFT', [owner.address, "LTLL", "LTLL", owner.address, 200n], owner)
@@ -39,8 +42,9 @@ describe('MealManager', function () {
         const mealIds = ["pro1", "pro2"];
         const note = "This is a test order.";
 
-        // 调用storeOrder函数
-        await mealManager.storeOrder(
+
+        // 让其他人来，调用storeOrder函数
+        await mealManager.connect(otherOne).storeOrder(
             userId,
             id,
             startPoint,
@@ -51,12 +55,12 @@ describe('MealManager', function () {
             false
         );
         // 检查Token是否铸造成功
-        let balanceOf = await mealToken.balanceOf(owner.address);
+        let balanceOf = await mealToken.balanceOf(otherOne.address);
         let balanceOfETH = Number(ethers.formatEther(balanceOf));
         expect(balanceOfETH).to.equal(Number(orderAmountToToken) / 100);
         console.log("balanceOfETH", balanceOfETH);
         // 断言结果
-        let myOrders = await mealManager.getUserOrders();
+        let myOrders = await mealManager.connect(otherOne).getUserOrders(otherOne.address);
         let storedOrder = myOrders[0];
         console.log("mint token myOrders", myOrders);
         expect(storedOrder.userId).to.equal(userId);
@@ -94,9 +98,7 @@ describe('MealManager', function () {
         expect(nftInfo).to.equal(id);
         console.log("nftInfo", nftInfo);
         // 断言结果
-        // 该方式返回的mealIds为undefined
-        // const storedOrder = await mealManager.userOrders(userId, id);
-        let myOrders = await mealManager.getUserOrders();
+        let myOrders = await mealManager.getUserOrders(owner.address);
         let storedOrder = myOrders[0];
         console.log("mint NFT myOrders", myOrders);
         expect(storedOrder.userId).to.equal(userId);
@@ -127,7 +129,7 @@ describe('MealManager', function () {
             false
         );
         await mealManager.deleteOrder(0);
-        const myOrders = await mealManager.getUserOrders();
+        const myOrders = await mealManager.getUserOrders(owner.address);
         expect(myOrders.length).to.equal(0);
     })
 
@@ -160,7 +162,7 @@ describe('MealManager', function () {
             endPoint,
             newNote
         );
-        const myOrders = await mealManager.getUserOrders();
+        const myOrders = await mealManager.getUserOrders(owner.address);
         console.log("updateOrders myOrders", myOrders);
         let updateOrder = myOrders[0];
         // 其他属性类似

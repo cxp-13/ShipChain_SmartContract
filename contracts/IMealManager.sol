@@ -55,5 +55,5 @@ interface IMealManager {
         string memory note
     ) external;
 
-    function getUserOrders() external view returns (Order[] memory);
+    function getUserOrders(address userAddress) external view returns (Order[] memory);
 }

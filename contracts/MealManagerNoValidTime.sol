@@ -22,13 +22,25 @@ contract MealManagerNoValidTime is IMealManager, ISuperToken {
         admin = msg.sender;
     }
 
-    function setOwnerOfMealNFTAndMealToken(address newOwner) external {
-        if (msg.sender == admin) {
-            MealNFT(mealNFT).setOwner(newOwner);
-            MealToken(mealToken).setOwner(newOwner);
-        } else {
-            revert InvalidAdmin("Only admin can set");
-        }
+    // Modifier to restrict access to only the admin
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only admin can call this function");
+        _;
+    }
+
+    // Function to set new MealNFT address
+    function setMealNFTAddress(address _newMealNFT) public onlyAdmin {
+        mealNFT = _newMealNFT;
+    }
+
+    // Function to set new MealToken address
+    function setMealTokenAddress(address _newMealToken) public onlyAdmin {
+        mealToken = _newMealToken;
+    }
+
+    function setOwnerOfMealNFTAndMealToken(address newOwner) external onlyAdmin{
+        MealNFT(mealNFT).setOwner(newOwner);
+        MealToken(mealToken).setOwner(newOwner);
     }
 
     // Function to store order message and mint tokens
@@ -135,7 +147,9 @@ contract MealManagerNoValidTime is IMealManager, ISuperToken {
     }
 
     // 获取当前用户的所有订单数组
-    function getUserOrders() external view returns (Order[] memory) {
-        return userOrders[msg.sender];
+    function getUserOrders(
+        address userAddress
+    ) external view returns (Order[] memory) {
+        return userOrders[userAddress];
     }
 }
