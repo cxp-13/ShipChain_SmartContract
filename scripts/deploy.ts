@@ -10,10 +10,17 @@ async function main() {
   const mealNFT = await MealNFT.deploy(owner.address, "LTLL", "LTLL", owner.address, 200n);
 
   console.log("Deploying MealManager contract...");
-  const MealManager = await ethers.getContractFactory("MealManager");
+  const MealManager = await ethers.getContractFactory("MealManagerNoValidTime");
+  console.log("MealToken", mealToken.target, "MealNFT", mealNFT.target);
+
   const mealManager = await MealManager.deploy(mealNFT.target, mealToken.target);
   await mealManager.waitForDeployment();
+
+  await mealToken.setOwner(mealManager.target);
+  await mealNFT.setOwner(mealManager.target);
+
   console.log("MealManager contract deployed to:", mealManager.target);
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
